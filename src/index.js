@@ -35,6 +35,8 @@ class ReactTouchEvents extends React.Component {
 
     this.currentX = 0;
     this.currentY = 0;
+
+    this.initTime = Date.now();
   };
 
 
@@ -60,14 +62,17 @@ class ReactTouchEvents extends React.Component {
   handleTouchCancel = () => {
     this.touchStarted = this.touchMoved = false;
     this.startX = this.startY = 0;
+    this.initTime = null;
   };
 
   handleTouchEnd = (event) => {
     this.touchStarted = false;
-
+    const now = Date.now();
     if (!this.touchMoved) {
-      if (this.props.onTap) {
+      if (this.props.onTap && this.initTime - now < this.props.longTapTimer) {
         this.props.onTap(event);
+      } else if (this.props.onTap && this.initTime - now >= this.props.longTapTimer) {
+        this.props.onLongTap(event);
       }
 
     } else if (!this.swipeOutBounded) {
@@ -105,6 +110,7 @@ class ReactTouchEvents extends React.Component {
 ReactTouchEvents.defaultProps = {
   tapTolerance: 10,
   swipeTolerance: 30,
+  longTapTimer: 500
 };
 
 
@@ -112,8 +118,10 @@ ReactTouchEvents.propTypes = {
   children: PropTypes.node,
   tapTolerance: PropTypes.number,
   swipeTolerance: PropTypes.number,
+  longTapTimer: PropTypes.number,
   onTap: PropTypes.func,
   onSwipe: PropTypes.func,
+  onLongTap: PropTypes.func,
 };
 
 
